@@ -1,0 +1,64 @@
+---
+title: "Automatic transmission versus manual transmission for MPG"
+author: "Huang, Ren-Huai"
+date: "Sunday, September 21, 2014"
+output: html_document
+---
+##Summary: 
+The dataset "mtcars" has been explored to figure out the relationship between a set of variables and miles per gallon (mpg) (outcome).The data of mtcars was extracted from the 1974 Motor Trend US magazine, and comprises fuel consumption and 10 aspects of automobile design and performance for 32 automobiles (1973-74 models). The variable "am" is a factor variable with Transmission type (0 = automatic, 1 = manual). Specifically, as shown below two questions are addressed:     
+1. we are fail to reject the hypothesis there is a difference bewteen an automatic and manual transmission for MPG.   
+2. The MPG difference between automatic and manual transmissions is - 0.02, very small. The 95% confidence interval for the difference is from -3.184815 to 3.137584.  
+Based on the analysis we performed We conclude that there is no significant difference between the automatic amd manual transmission for the MPG. 
+
+
+```{r}
+fitall <- lm (mpg ~ . , data = mtcars)
+summary(fitall)$coeff
+```
+From the p-value in the table above, the variable weight (wt) have the most effect on mpg outcome with a p-value of 0.06. The p-values for all other variables are bigger than - 0.2. specifically, the p-value for the variable am, which we are interesting, is 0.23. 
+```{r}
+fit1 <- lm(mpg ~ am + wt, data = mtcars)
+summary(fit1)$coeff
+```
+Above we only fit the mpg with variables "wt" and "am". The p-value for the variable "am" is 0.98, which suggested we are fail to reject the hypothesis that there is no defference bewteen the automatic or the manual transmission for the MPG.
+
+```{r}
+confint(object = fit1, level = 0.95)
+```
+The estimate difference between automatic and manual transmission is only 0.02 with 95% confidence interval between -0.318 and 3.137.     
+
+#Further Exploration: 
+```{r furtherexplore}
+fit2 <- lm(mpg ~  am, data = mtcars)
+summary(fit2)$coeff
+```
+
+If we look at the relationship between mpg and am directly, it seems that the manual transmission have better mpg that automatic transmission. But if you look further, we will found that the higher mpg is acturally due to the effect of the car weight (see below and attached figures). 
+
+```{r furtherexplore car weight}
+fit3<- lm(mpg ~ wt, data = mtcars)
+summary(fit3)$coeff
+```
+```{r}
+fit4 <- lm(resid(fit3)~am, data = mtcars)
+summary(fit4)$coeff
+```
+\pagebreak
+
+#Appendix
+
+```{r, echo = F}
+data(mtcars)
+plot(mpg ~ factor(am), data = mtcars, main = "Miles/(US) gallon ~ Transmission Type", xlab = "Transmission (0 = automatic, 1 = manual)", ylab = "Miles/(US) gallon")
+
+```
+
+```{r, echo = F}
+
+plot(resid(fit3) ~ factor(am), data = mtcars, main = "Residuals of (mpg ~ wt) ~ am", xlab = "Transmission (0 = automatic, 1 = manual)", ylab = "Residuals of [mpg (Miles/(US) gallon) ~ wt]")
+```
+
+```{r, echo = F}
+plot(mpg~wt, data = mtcars, main = "Fitting (mpg ~ wt)", xlab = "Weight (lb/1000)", ylab = "Miles/(US) gallon")
+abline(lm(mpg~ wt, data = mtcars))
+```
